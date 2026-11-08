@@ -2,15 +2,18 @@
 The ZIP contains readable source, prompts and demo fixtures; never user records.
 """
 import hashlib
+import importlib
 import os
 from pathlib import Path
 import runpy
 import sys
 import tempfile
+import threading
+import types
 import zipfile
 
 archive = Path(__file__).with_name("inquiryflow_source.zip")
-expected = "f121727e257be69c43442e27244c98066c8c6decbdbc95c1700fe5751bd4adee"
+expected = "2ee52d03000d7b7aeca45ba2e0d5c3fad4e7aee2a89531246cc42d12560b8654"
 actual = hashlib.sha256(archive.read_bytes()).hexdigest()
 if actual != expected:
     raise RuntimeError("Source bundle integrity check failed")
@@ -29,6 +32,18 @@ if not code_root.is_dir():
         except OSError:
             if not code_root.is_dir():
                 raise
-if str(code_root) not in sys.path:
-    sys.path.insert(0, str(code_root))
+# Streamlit can hot-reload the entrypoint without restarting Python. Do not
+# accidentally retain a backend module from a previous verified ZIP version.
+runtime=sys.modules.setdefault('_inquiryflow_deploy_runtime',types.ModuleType('_inquiryflow_deploy_runtime'))
+lock=runtime.__dict__.setdefault('lock',threading.RLock())
+with lock:
+    if runtime.__dict__.get('bundle') != actual:
+        for name in list(sys.modules):
+            if name=='inquiryflow' or name.startswith('inquiryflow.'):
+                del sys.modules[name]
+        sys.path[:]=[p for p in sys.path if not str(p).startswith(str(Path(tempfile.gettempdir())/'inquiryflow-code-'))]
+        sys.path.insert(0,str(code_root))
+        importlib.import_module('inquiryflow.public_demo')
+        importlib.import_module('inquiryflow.public_ui')
+        runtime.bundle=actual
 runpy.run_path(str(code_root / "public_app.py"), run_name="__main__")
