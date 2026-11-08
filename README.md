@@ -23,10 +23,10 @@ Python 3.12を使用します。
 pip install -r requirements.txt
 streamlit run public_app.py
 ```
-Streamlit Community Cloudでこのリポジトリと `public_app.py` を指定します。サーバーのSecrets設定は不要です。`.env`、金鑰、個人の履歴ファイルは追加しないでください。
+Streamlit Community Cloudでこのリポジトリと `public_app.py` を指定します。サーバーのSecrets設定は不要です。`.env`、APIキー、個人の履歴ファイルは追加しないでください。
 
 ## 検証の読み方
 「検証と改善」に3例の問題・修正・残る制約を記載しています。既知の合成例であり、企業導入実績・未見テスト成績・効果の保証ではありません。人の自己申告時間とAPI生成時間は条件が異なるため、削減率として比較していません。
 
 ## Source layout
-The deploy entrypoint verifies the SHA-256 of `inquiryflow_source.zip`, extracts its readable source into a versioned temporary code directory, and runs its `public_app.py`. This avoids browser upload flattening nested folders. The ZIP contains the `inquiryflow/`, `prompts/`, `data/` directories and a per-file release manifest. Visitor records and API keys are not in this archive. Code is shared read-only; each visitor uses a separate temporary data directory. Download or unpack the ZIP to inspect the full Python source.
+The deploy entrypoint verifies the SHA-256 of `inquiryflow_source.zip`, extracts its readable source into a versioned temporary code directory, and runs its `public_app.py`. The ZIP contains the complete allowlisted source, prompts, synthetic fixtures and release manifest. It excludes visitor history and API keys. The shared code directory is read-only during app operation; each visitor uses a separate temporary data directory. Download or unpack the ZIP to inspect the full source.
