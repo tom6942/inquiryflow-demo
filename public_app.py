@@ -13,7 +13,7 @@ import types
 import zipfile
 
 archive = Path(__file__).with_name("inquiryflow_source.zip")
-expected = "186968dff222b1ab282b8991c2d7a62d7619484d3acb776760fda8384706c29f"
+expected = "afca4eabf492b8cfe855e99951b5c8efa3d521cd5957e442498f90a86f1cce49"
 actual = hashlib.sha256(archive.read_bytes()).hexdigest()
 if actual != expected:
     raise RuntimeError("Source bundle integrity check failed")
